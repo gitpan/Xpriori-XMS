@@ -1,0 +1,21 @@
+Changes
+MANIFEST			This list of files
+META.yml
+Makefile.PL
+README
+lib/Xpriori/XMS/Config.pm
+lib/Xpriori/XMS/Http.pm
+lib/Xpriori/XMS/ServerUtil.pm
+lib/Xpriori/XMS/ServerUtil/Solaris.pm
+lib/Xpriori/XMS/ServerUtil/Win32.pm
+sample/sampleXML/blog.xml
+sample/sampleXML/blog2.xml
+sample/sampleXML/insFile.xml
+sample/sampleXML/modFile.xml
+sample/server1.pl
+sample/test1.pl
+sample/test2.pl
+sample/test3.pl
+sample/test4.pl
+sample/test5.pl
+t/Xpriori-XMS.t
