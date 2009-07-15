@@ -1,13 +1,16 @@
 Changes
-MANIFEST			This list of files
-META.yml
-Makefile.PL
-README
 lib/Xpriori/XMS/Config.pm
 lib/Xpriori/XMS/Http.pm
+lib/Xpriori/XMS/NeoCoreSvc.cfg
 lib/Xpriori/XMS/ServerUtil.pm
 lib/Xpriori/XMS/ServerUtil/Solaris.pm
 lib/Xpriori/XMS/ServerUtil/Win32.pm
+lib/Xpriori/XMS/Soap.pm
+lib/Xpriori/XMS/Svc.pm
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
 sample/sampleXML/blog.xml
 sample/sampleXML/blog2.xml
 sample/sampleXML/insFile.xml

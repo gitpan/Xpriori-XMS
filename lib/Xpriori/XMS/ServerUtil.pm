@@ -159,7 +159,7 @@ KAWAI,Takanori kwitknr@cpan.org
 
 =head1 COPYRIGHT
 
-The Xpriori::XMS::ServerUtil module is Copyright (c) 2007 KAWAI Takanori, Japan.
+The Xpriori::XMS::ServerUtil module is Copyright (c) 2009 KAWAI,Takanori, Japan.
 All rights reserved.
 
 You may distribute under the terms of either the GNU General Public

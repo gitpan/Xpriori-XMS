@@ -1,4 +1,4 @@
-#   Configuration file to run Xpriori
+#   Configuration file to run Xpriori::XMS
 package Xpriori::XMS::Config;
 our %_connect = (
     METHOD   => 'http',
@@ -12,6 +12,7 @@ our %_cnf = (
 our %_svrCnf = (
     OSMODULE => 'Win32',   # currently : Win32 or Solaris
     PASSWORD => 'admin',
-    NEOHOME  => 'C:/Xpriori/neoxml', #Windows
+    # NEOHOME  => 'C:/NeoCore/neoxml', #Windows
+    NEOHOME  => 'D:/Xpriori/neoxml', #Windows
 );
 1;

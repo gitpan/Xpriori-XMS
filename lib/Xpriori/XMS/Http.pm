@@ -1,4 +1,5 @@
 package Xpriori::XMS::Http;
+use utf8;
 use strict;
 use warnings;
 #require Exporter;
@@ -10,18 +11,18 @@ use URI::Escape;
 use Digest::MD5 qw(md5_hex);    # Needed to encrypt login
 use Xpriori::XMS::Config;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use constant CstCRLF => "\x0d\x0a";
-use constant CstGETLIMIT => 1024;
+use constant CstGETLIMIT => 256; #1024;
 use constant CstNeoAdmin => 'neoadmin';
 use constant CstNeoQuery => 'neoquery';
 #---------------------------------------------------------------------
 # new: constructor
 #---------------------------------------------------------------------
-sub new($$$%)
+sub new($$$;$%)
 {
-    my ($sClass, $sUrl, $sUsr, $sPasswd, %hPrmW) = @_;
+    my ($sClass, $sUrl, $sUsr, $sPasswd, $iConn, %hPrmW) = @_;
     my %hConf = %Xpriori::XMS::Config::_cnf;
     while(my($sKey, $sVal) = each(%hPrmW))
     {
@@ -36,22 +37,37 @@ sub new($$$%)
     $oSelf->{fullUrl} = $sUrl;
     $oSelf->{_lwpUa} = LWP::UserAgent->new();
 
-    my $sRes = $oSelf->_sendQueryPost(CstNeoAdmin, 
+    if($iConn)
+    {
+      $oSelf->{_sid} = $iConn;
+    }
+    else
+    {
+      my $sRes = $oSelf->_sendQueryPost(CstNeoAdmin, 
                                ('cmd'    => 'GETSESSION', 
                                 'user'   => $sUsr, 
                                 'passwd' => md5_hex($sPasswd))
                               );
-    #get SID from 2nd-line
-    my (undef, $xmlContent) = split("\n", $sRes, 2);
-    if ($xmlContent =~ m|^\s*<.+>(.+)</.+>\s*$| )
-    {
-        $oSelf->{_sid} = $1;
-    }
-    else
-    {
-        die($sRes);
+      #get SID from 2nd-line
+      my (undef, $xmlContent) = split("\n", $sRes, 2);
+      if ($xmlContent =~ m|^\s*<.+>(.+)</.+>\s*$| )
+      {
+          $oSelf->{_sid} = $1;
+      }
+      else
+      {
+          die($sRes);
+      }
     }
     return $oSelf;
+}
+#---------------------------------------------------------------------
+# getSID method
+#---------------------------------------------------------------------
+sub getSID
+{
+    my($oSelf) = @_;
+    return $oSelf->{_sid};
 }
 #---------------------------------------------------------------------
 # setMethod method
@@ -145,7 +161,8 @@ sub _buildParam($%)
         while(my($sKey, $sVal) = each(%hParam))
         {
             $sPrm .= '&' if($sPrm ne '');
-            $sVal = ($sVal)? URI::Escape::uri_escape($sVal) : '';
+            #$sVal = ($sVal)? URI::Escape::uri_escape($sVal) : '';
+            $sVal = ($sVal)? URI::Escape::uri_escape_utf8($sVal) : '';
             $sPrm .= "$sKey=$sVal";
         }
     }
@@ -262,7 +279,9 @@ sub _mkReqMultipart($$@)
                 $request->add_content(
                         'Content-Type: ' . $rhPrm->{type} . CstCRLF . CstCRLF);
             }
-            $request->add_content($rhPrm->{content});
+            my $sCnt = $rhPrm->{content};
+            utf8::encode($sCnt);
+            $request->add_content($sCnt);
         }
         $request->add_content(CstCRLF  . $boundary . '--');
     }
@@ -658,12 +677,21 @@ Xpriori::XMS is a module enables you to talk to Xpriori::XMS Database with http 
 
 =head2 new($$$%)
 
-I<$oXpH> = Xprirori::Http->new(I<$URL>, I<$User>, I<$Passwd> [, I<%Option>]);
+I<$oXpH> = Xpriori::XMS::Http->new(I<$URL>, I<$User>, I<$Passwd> [, I<$sID>, I<%Option>]);
 
 Constructor. 
-Creates a Xprirori::Http object and start session.
+Creates a Xpriori::XMS::Http object and start session.
 If I<$URL> is undef or empty string, 
 Xpriori::XMS::Config::_connect will be used.
+
+IF I<$sID> is not set, this will login with I<$User>, I<$Passwd>.
+IF I<$sID> is set, this will this SID for request without login.
+
+=head2 getSID
+
+I<$oXpH> = $oXpH->getSID();
+
+return SID.
 
 =head2 logout
 
@@ -867,7 +895,7 @@ KAWAI,Takanori kwitknr@cpan.org
 
 =head1 COPYRIGHT
 
-The Xpriori::XMS::Http module is Copyright (c) 2007 KAWAI Takanori, Japan.
+The Xpriori::XMS::Http module is Copyright (c) 2009 KAWAI,Takanori, Japan.
 All rights reserved.
 
 You may distribute under the terms of either the GNU General Public
