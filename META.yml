@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Xpriori-XMS
-version:             0.02
+version:             0.03
 abstract:            Perl extension for Xpriori::XMS Database.
 license:             ~
 author:              

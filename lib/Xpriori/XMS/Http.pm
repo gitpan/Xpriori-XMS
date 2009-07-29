@@ -11,7 +11,7 @@ use URI::Escape;
 use Digest::MD5 qw(md5_hex);    # Needed to encrypt login
 use Xpriori::XMS::Config;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use constant CstCRLF => "\x0d\x0a";
 use constant CstGETLIMIT => 256; #1024;
@@ -20,9 +20,23 @@ use constant CstNeoQuery => 'neoquery';
 #---------------------------------------------------------------------
 # new: constructor
 #---------------------------------------------------------------------
-sub new($$$;$%)
+sub new($$$;%)
 {
-    my ($sClass, $sUrl, $sUsr, $sPasswd, $iConn, %hPrmW) = @_;
+    my $sClass = shift(@_);
+    my $sUrl = shift(@_);
+    my ($sUsr, $sPasswd, $iConn);
+    if(ref($_[0]) eq 'HASH')
+    {
+      my $rhConn = shift(@_);
+      $iConn = $rhConn->{sid};
+    }
+    else
+    {
+      $sUsr    = shift(@_);
+      $sPasswd = shift(@_);
+    }
+    my %hPrmW = @_;
+
     my %hConf = %Xpriori::XMS::Config::_cnf;
     while(my($sKey, $sVal) = each(%hPrmW))
     {
@@ -647,10 +661,14 @@ sub storeXML
         );
     return $oSelf->_sendQueryPostMultipart(CstNeoQuery, 'STORE', @aPrm);
 }
+sub DESTROY
+{
+  my($oSelf) = @_;
+  local $@; #Keep previous die-message.
+  $oSelf->logout() 
+        if($oSelf->{AUTO_LOGOUT} && $oSelf->{_sid});
+}
 1;
-
-
-# Preloaded methods go here.
 
 1;
 __END__
@@ -664,12 +682,32 @@ Xpriori::XMS::Http - Perl extension for communicating with Xpriori::XMS Database
 
 =head1 SYNOPSIS
 
+1. Normal
   use strict;
   use Xpriori::XMS::Http;
-  my $oXpH = new Xpriori::XMS('http://localhost:7700/', 'Administrator', 'admin', );
+  my $oXpH = new Xpriori::XMS('http://localhost:7700/', 'Administrator', 'admin');
   $oXpH->storeXML('<sample><base/></sample>');
   $oXpH->insertXML('/ND/sample/base', '<XYZ>xyz</XYZ>');
   my $sRes = $oXpH->queryXML('/ND/sample/XYZ');
+
+2. Use Previous Connect
+  use strict;
+  use Xpriori::XMS::Http;
+  my $oXpH = new Xpriori::XMS('http://localhost:7700/', 'Administrator', 'admin');
+  my $iSid = $oXpH->getSid();
+  (snip)
+  #Use Previous Connect(Even other scripts!)
+  my $oNew = new Xpriori::XMS('http://localhost:7700/', { sid => $iSid});
+
+3. With auto logout
+  use strict;
+  use Xpriori::XMS::Http;
+  my $oXpH = new Xpriori::XMS('http://localhost:7700/', 'Administrator', 'admin', 
+                             AUTO_LOGOUT => 1);
+  (or)
+  my $oNew = new Xpriori::XMS('http://localhost:7700/', { sid => $iSid}
+                            AUTO_LOGOUT => 1);
+
 
 =head1 DESCRIPTION
 

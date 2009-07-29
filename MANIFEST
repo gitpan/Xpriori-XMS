@@ -21,4 +21,5 @@ sample/test2.pl
 sample/test3.pl
 sample/test4.pl
 sample/test5.pl
+sample/test6.pl
 t/Xpriori-XMS.t
